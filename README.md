@@ -11,10 +11,9 @@ Powered by [on-typing-assists of rust-analyzer](https://rust-analyzer.github.io/
 Just install it by any plugin manager, and the plugin will automatically setup the handler for it. The plugin is lazy loaded by default, usually you do not need to add any other lazy loading logic by plugin manger.
 
 ```vim
+" packer.nvim
 lua<< EOF
--- packer.nvim
 use({ "yioneko/nvim-type-fmt" })
-
 EOF
 
 " vim-plug
@@ -26,10 +25,9 @@ To disable auto setup of the plugin, put this before the loading of plugins:
 ```vim
 g:type_fmt_loaded = v:true
 
+" or in lua
 lua<< EOF
--- or in lua
 vim.g.type_fmt_loaded = true
-
 EOF
 ```
 
@@ -38,7 +36,7 @@ EOF
 The configuration is optional.
 
 ```lua
-require("nvim-type-fmt").setup({
+require("type-fmt").setup({
     -- In case if you only want to enable this for limited buffers
     -- We already filter it by checking capabilities of attached lsp client
     buf_filter = function(bufnr)
