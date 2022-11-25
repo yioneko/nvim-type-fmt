@@ -121,7 +121,8 @@ function M.request(winnr, key)
 			if otf_buf_track[ctx.bufnr] then
 				otf_buf_track[ctx.bufnr].cancel = nil
 			end
-			vim.lsp.handlers[ON_TYPE_FORMATTING](err, result, ctx, config)
+			local handler = client.handlers[ON_TYPE_FORMATTING] or vim.lsp.handlers[ON_TYPE_FORMATTING] or M.handler
+			handler(err, result, ctx, config)
 		end,
 		bufnr
 	)
@@ -136,7 +137,13 @@ end
 
 local enabled = false
 
+local listened = false
+
 local function listen()
+	if listened then
+		return
+	end
+
 	local function listen_fn(key)
 		local mode = vim.api.nvim_get_mode().mode
 		if mode ~= "i" then
@@ -160,15 +167,18 @@ local function listen()
 		end)
 	end
 
+	-- currently we do not have a reliable way to remove the listener
+	-- so we must ensure this will not throw and forbid double listening
 	vim.on_key(function(key)
 		local success, err = pcall(listen_fn, key)
 		if not success then
 			-- disable at error
 			M.disable()
-			-- let it crash to unbind listener
-			error(err)
+			notify(tostring(err), vim.log.levels.ERROR)
 		end
 	end)
+
+	listened = true
 end
 
 function M.enable()
@@ -201,7 +211,7 @@ function M.enable()
 		end,
 	})
 
-	-- otherwise there will be memory leak
+	-- otherwise there will be potential memory leak
 	vim.api.nvim_create_autocmd("BufDelete", {
 		group = group,
 		callback = function(args)
