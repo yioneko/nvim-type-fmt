@@ -2,9 +2,13 @@
 
 LSP handler of `textDocument/onTypeFormatting` for nvim.
 
+https://user-images.githubusercontent.com/65551246/203911852-4d8cc381-7768-4ef1-bd89-6e233dc25b35.mp4
+
+Powered by [on-typing-assists of rust-analyzer](https://rust-analyzer.github.io/manual.html#on-typing-assists).
+
 ## Usage
 
-Just install it by any plugin manager, and the plugin will automatically setup the handler for it. The plugin is lazy loaded by default, usually you do need to add any other lazy loading logic by plugin manger.
+Just install it by any plugin manager, and the plugin will automatically setup the handler for it. The plugin is lazy loaded by default, usually you do not need to add any other lazy loading logic by plugin manger.
 
 ```vim
 lua<< EOF
