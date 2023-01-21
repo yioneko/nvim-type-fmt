@@ -79,14 +79,9 @@ function M.handler(err, result, ctx, config)
 	end
 end
 
-function M.request(winnr, key)
+function M.request(winnr, client, key)
 	winnr = winnr or vim.api.nvim_get_current_win()
 	local bufnr = vim.api.nvim_win_get_buf(winnr)
-
-	local client = otf_buf_track[bufnr].client
-	if not client or client.is_stopped() then
-		return
-	end
 
 	-- vim reports "\r" as enter key, but lsp use "\n" as new line character instead
 	if key == "\r" then
@@ -161,8 +156,21 @@ local function listen()
 		local winnr = vim.api.nvim_get_current_win()
 		-- schedule to wait key inserted
 		vim.schedule(function()
-			if vim.api.nvim_win_is_valid(winnr) and conf.buf_filter(bufnr) then
-				M.request(winnr, key)
+			if vim.api.nvim_win_is_valid(winnr) and conf.buf_filter(bufnr) and otf_buf_track[bufnr] then
+				local cur_client = otf_buf_track[bufnr].client
+				if cur_client and is_support_on_type_fmt(cur_client) and not cur_client.is_stopped() then
+					M.request(winnr, cur_client, key)
+				else
+					-- cur client no longer valid, try to find next
+					local alt_client = get_otf_client(bufnr)
+					if alt_client then
+						M.attach_buf(bufnr, alt_client)
+						M.request(winnr, alt_client, key)
+					else
+						-- no valid client, reset
+						M.reset_buf(bufnr)
+					end
+				end
 			end
 		end)
 	end
@@ -170,7 +178,7 @@ local function listen()
 	-- currently we do not have a reliable way to remove the listener
 	-- so we must ensure this will not throw and forbid double listening
 	vim.on_key(function(key)
-		local success, err = pcall(listen_fn, key)
+		local success, err = xpcall(listen_fn, debug.traceback, key)
 		if not success then
 			-- disable at error
 			M.disable()
