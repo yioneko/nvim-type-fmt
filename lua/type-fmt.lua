@@ -25,9 +25,10 @@ local function is_support_on_type_fmt(client)
 	return client.server_capabilities.documentOnTypeFormattingProvider ~= nil
 end
 
+local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
 local function get_otf_client(bufnr)
 	local result
-	for _, client in ipairs(vim.lsp.get_active_clients({ bufnr = bufnr })) do
+	for _, client in ipairs(get_clients({ bufnr = bufnr })) do
 		if is_support_on_type_fmt(client) then
 			if result then
 				result = conf.prefer_client(result, client)
