@@ -176,10 +176,17 @@ local function listen()
 		end)
 	end
 
+	local can_receive_lhs
 	-- currently we do not have a reliable way to remove the listener
 	-- so we must ensure this will not throw and forbid double listening
-	vim.on_key(function(key)
-		local success, err = xpcall(listen_fn, debug.traceback, key)
+	vim.on_key(function(key, typed)
+		if typed then
+			can_receive_lhs = true
+		elseif can_receive_lhs then
+			-- we can receive original typed key while not received
+			return
+		end
+		local success, err = xpcall(listen_fn, debug.traceback, typed or key)
 		if not success then
 			-- disable at error
 			M.disable()
