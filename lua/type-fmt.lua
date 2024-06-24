@@ -22,8 +22,7 @@ local function get_buf_version(bufnr)
 end
 
 local function is_support_on_type_fmt(client)
-	return (client.supports_method and client.supports_method(ON_TYPE_FORMATTING))
-		or client.server_capabilities.documentOnTypeFormattingProvider ~= nil
+	return client.server_capabilities.documentOnTypeFormattingProvider ~= nil
 end
 
 local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
